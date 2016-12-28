@@ -1,4 +1,4 @@
-    usage: kraken [<flags>]
+    usage: kraken-tick [<flags>]
     
     Flags:
       --help             Show context-sensitive help (also try --help-long and
