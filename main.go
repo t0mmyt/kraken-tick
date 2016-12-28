@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 
+	log "github.com/Sirupsen/logrus"
+	"github.com/fatih/color"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
+	debug    = kingpin.Flag("debug", "Enable debug logs").Bool()
 	tickRoot = kingpin.Flag("tickerRoot", "URL Endpoint for ticker").Default("https://api.kraken.com/0/public/Ticker").String()
 	pair     = kingpin.Flag("pair", "Currency pair to get").Default("XXBTZEUR").String()
 	format   = kingpin.Flag("format", "Format for number").Default("%.3f\n").String()
@@ -41,6 +43,7 @@ func getTicker(tickRoot, pair string) (tick, error) {
 	q := req.URL.Query()
 	q.Add("pair", pair)
 	req.URL.RawQuery = q.Encode()
+	log.Debugf("Built URL: %s", req.URL.String())
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -64,6 +67,10 @@ func getTicker(tickRoot, pair string) (tick, error) {
 
 func main() {
 	kingpin.Parse()
+	if *debug {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	t, err := getTicker(*tickRoot, *pair)
 	if err != nil {
 		log.Fatalf("%s", err)
@@ -72,5 +79,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
-	fmt.Printf(*format, last)
+	color.Yellow(fmt.Sprintf(*format, last))
 }
